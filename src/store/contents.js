@@ -11,6 +11,21 @@ export const useContentsStore = defineStore("contents", {
       this.contentsInfo.push(contentsInfo);
     },
     // コンテンツを取得するアクション
+    getContentsInfo() {
+      return this.contentsInfo;
+    },
+    // コンテンツを更新するアクション
+    updateContentsInfo(fromContentsInfo,dstContentsInfo){
+      const index=this.contentsInfo.indexOf(fromContentsInfo);
+
+      this.contentsInfo.splice(index,1,dstContentsInfo);
+
+    },
+    // コンテンツを削除するアクション
+    removeContentsInfo(contentsInfo) {
+      const index=this.contentsInfo.indexOf(contentsInfo);
+      this.contentsInfo.splice(index, 1);
+    },
     // getContentsInfo(categoryId, content, date) {
     //   const filterdObject = this.contentsInfo.filter((item) => {
     //     (categoryId !== undefined &&
