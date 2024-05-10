@@ -4,7 +4,7 @@
     <h1 class="text-center">ゆめにっき</h1>
     <v-select
       v-model="categoryId"
-      label="夢の種類"
+      label="ゆめの種類"
       variant="outlined"
       :items="categoryItem"
       item-title="text"
@@ -12,7 +12,7 @@
       return-value
     ></v-select>
     <v-textarea
-      label="夢の内容"
+      label="ゆめの内容"
       variant="outlined"
       v-model="dreamContent"
       clearable

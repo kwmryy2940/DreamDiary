@@ -17,9 +17,7 @@ export const useContentsStore = defineStore("contents", {
     // コンテンツを更新するアクション
     updateContentsInfo(fromContentsInfo,dstContentsInfo){
       const index=this.contentsInfo.indexOf(fromContentsInfo);
-
       this.contentsInfo.splice(index,1,dstContentsInfo);
-
     },
     // コンテンツを削除するアクション
     removeContentsInfo(contentsInfo) {

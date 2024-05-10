@@ -29,7 +29,6 @@
             :key="content"
             class="ma-2"
             variant="outlined"
-            @dblclick="onDblClick(content)"
           >
             <v-card-title>{{ content.timestamp }}</v-card-title>
             <v-card-text>{{ content.dreamContent }}</v-card-text>
@@ -37,7 +36,7 @@
               <v-btn
                 prepend-icon="mdi-pencil"
                 color="green"
-                @click="onEditClick(content)"
+                @click="openEditDialog(content)"
                 >ゆめを書き換える</v-btn
               >
               <v-btn
@@ -55,7 +54,6 @@
             :key="content"
             class="ma-2"
             variant="outlined"
-            @dblclick="onDblClick(content)"
           >
             <v-card-title>{{ content.timestamp }}</v-card-title>
             <v-card-text>{{ content.dreamContent }}</v-card-text>
@@ -63,7 +61,7 @@
               <v-btn
                 prepend-icon="mdi-pencil"
                 color="green"
-                @click="onEditClick(content)"
+                @click="openEditDialog(content)"
                 >ゆめを書き換える</v-btn
               >
               <v-btn
@@ -81,7 +79,6 @@
             :key="content"
             class="ma-2"
             variant="outlined"
-            @dblclick="onDblClick(content)"
           >
             <v-card-title>{{ content.timestamp }}</v-card-title>
             <v-card-text>{{ content.dreamContent }}</v-card-text>
@@ -89,7 +86,7 @@
               <v-btn
                 prepend-icon="mdi-pencil"
                 color="green"
-                @click="onEditClick(content)"
+                @click="openEditDialog(content)"
                 >ゆめを書き換える</v-btn
               >
               <v-btn
@@ -103,10 +100,42 @@
         </v-tabs-window-item>
       </v-tabs-window>
 
+      <v-dialog v-model="editDialog">
+        <v-card>
+          <v-card-title>ゆめを書き換える</v-card-title>
+          <v-card-text>
+            <v-select
+              v-model="editItem.categoryId"
+              label="ゆめの種類"
+              variant="outlined"
+              :items="categoryItem"
+              item-title="text"
+              item-value="value"
+              return-value
+            ></v-select>
+            <v-textarea
+              label="ゆめの内容"
+              variant="outlined"
+              v-model="editItem.dreamContent"
+              clearable
+            ></v-textarea>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="primary" variant="text" @click="editDialog = false"
+              >キャンセル</v-btn
+            >
+            <v-btn color="purple" variant="text" @click="onUpdateClick"
+              >ゆめを更新</v-btn
+            >
+            <v-spacer></v-spacer>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
       <v-dialog v-model="deleteDialog">
         <v-card>
-          <v-card-title
-          class="bg-yellow-accent-4 text-blue-grey"
+          <v-card-title class="bg-yellow-accent-4 text-blue-grey"
             ><p>忘れたゆめは戻ってきません。</p>
             <p>よろしいですか？</p>
           </v-card-title>
@@ -119,17 +148,13 @@
             <v-btn color="primary" variant="text" @click="deleteDialog = false"
               >キャンセル</v-btn
             >
-            <v-btn color="purple" variant="text" @click="onDeleteClick">忘れる</v-btn>
+            <v-btn color="purple" variant="text" @click="onDeleteClick"
+              >ゆめを忘れる</v-btn
+            >
             <v-spacer></v-spacer>
           </v-card-actions>
         </v-card>
       </v-dialog>
-
-      <!-- <v-card v-for="content in contents" :key="content" class="ma-2" variant="outlined">
-        <v-card-title>{{ content.timestamp }}</v-card-title>
-        <v-card-subtitle>分類：{{ categoryMap[content.categoryId] }}</v-card-subtitle>
-        <v-card-text>{{ content.dreamContent }}</v-card-text>
-      </v-card> -->
     </v-sheet>
     <v-fab
       absolute
@@ -147,48 +172,37 @@
 import { ref } from "vue";
 import { useContentsStore } from "../store/contents.js";
 
-const tab = ref(null);
+const tab = ref(0);
 const contentsStore = useContentsStore();
 const dialog = ref(false);
+const editDialog = ref(false);
 const deleteDialog = ref(false);
 const contents = ref([]);
 const categoryMap = ref({ 0: "吉夢", 1: "悪夢", 2: "その他" });
-const tabList = ref([
+const categoryItem = [
   { value: 0, text: "吉夢" },
   { value: 1, text: "悪夢" },
   { value: 2, text: "その他" },
-]);
+];
 
+const tabList = ref(categoryItem);
+const originItem = ref(null);
 const editItem = ref(null);
 
 function onClick() {
   contents.value = contentsStore.getContentsInfo();
 }
-function onEditClick(content) {
-  console.log(content);
 
-  const beforeUpdContents = contentsStore.getContentsInfo();
-  console.log("beforeUpdContents:", beforeUpdContents);
+function openEditDialog(content) {
+  originItem.value = JSON.parse(JSON.stringify(content)); // depp copy
+  editItem.value = content;
+  editDialog.value = true;
+}
 
-  const test = {
-    categoryId: 2,
-    dreamContent: "update test",
-    timestamp: new Date().toLocaleString("ja-JP", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    }),
-  };
-
-  contentsStore.updateContentsInfo(content, test);
-
-  const afterUpdContents = contentsStore.getContentsInfo();
-  console.log("afterUpdContents:", afterUpdContents);
-
-  // console.log(contents.filter(item=>item===content));
+function onUpdateClick() {
+  contentsStore.updateContentsInfo(originItem.value, editItem.value);
+  editDialog.value = false;
+  contents = contentsStore.getContentsInfo();
 }
 
 function openDeleteDialog(content) {
@@ -197,13 +211,7 @@ function openDeleteDialog(content) {
 }
 
 function onDeleteClick() {
-  console.log(editItem.value);
   contentsStore.removeContentsInfo(editItem.value);
-  // editItem.value = null;
   deleteDialog.value = false;
-}
-
-function onDblClick(content) {
-  console.log(content);
 }
 </script>
