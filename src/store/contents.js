@@ -4,6 +4,7 @@ export const useContentsStore = defineStore("contents", {
   state: () => ({
     // コンテンツを保持する状態
     contentsInfo: [],
+    contentsId: 0,
   }),
   actions: {
     // コンテンツを更新するアクション
@@ -15,14 +16,37 @@ export const useContentsStore = defineStore("contents", {
       return this.contentsInfo;
     },
     // コンテンツを更新するアクション
-    updateContentsInfo(fromContentsInfo,dstContentsInfo){
-      const index=this.contentsInfo.indexOf(fromContentsInfo);
-      this.contentsInfo.splice(index,1,dstContentsInfo);
+    updateContentsInfo(contentsId, dstContentsInfo) {
+      // const contents = JSON.parse(
+      //   JSON.stringify(
+      //     this.contentsInfo.filter((item) => item.id === contensId)
+      //   )
+      // );
+      
+      // const i= this.contentsInfo.forEach((element,index) => {
+
+
+      //   if(element.id===contentsId){
+      //     return index;
+      //   }
+      // });
+
+      const index=this.contentsInfo.findIndex((element)=>element.id===contentsId);
+      if(index===-1)return -1;
+      // const index = this.contentsInfo.indexOf(contents);
+      // const index = this.contentsInfo.id.indexOf(contentsId);
+      this.contentsInfo.splice(index, 1, dstContentsInfo);
+      return 0;
     },
     // コンテンツを削除するアクション
     removeContentsInfo(contentsInfo) {
-      const index=this.contentsInfo.indexOf(contentsInfo);
+      const index = this.contentsInfo.indexOf(contentsInfo);
       this.contentsInfo.splice(index, 1);
+    },
+    // コンテンツIDを取得するアクション
+    getNextContentsId() {
+      this.contentsId++;
+      return this.contentsId;
     },
     // getContentsInfo(categoryId, content, date) {
     //   const filterdObject = this.contentsInfo.filter((item) => {

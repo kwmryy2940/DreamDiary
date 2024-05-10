@@ -103,7 +103,11 @@ async function onAddContents() {
     throw new Error("Validation error.");
   }
 
+  // IDを採番
+  const contentsId=contentsStore.getNextContentsId();
+
   const contents = {
+    id:contentsId,
     categoryId: categoryId.value,
     dreamContent: dreamContent.value,
     timestamp: new Date().toLocaleString("ja-JP", {

@@ -15,6 +15,46 @@
         ゆめ履歴
       </v-btn>
     </template>
+    <!-- <v-fab
+      absolute
+      location="center left"
+      size="small"
+      color="primary"
+      icon="mdi-magnify"
+      @click="searchDialog = true"
+    >
+    </v-fab>
+    <v-dialog v-model="searchDialog">
+      <v-card>
+        <v-card-title>ゆめをさがす</v-card-title>
+        <v-card-text>
+          <v-select
+            label="ゆめの種類"
+            variant="outlined"
+            :items="categoryItem"
+            item-title="text"
+            item-value="value"
+            return-value
+          ></v-select>
+          <v-text-field class="ma-1 pa-1" variant="outlined" type="date">
+          </v-text-field>
+          <v-text-field
+            class="ma-1 pa-1"
+            variant="outlined"
+            label="ゆめの内容"
+          ></v-text-field>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn
+            class="bg-purple"
+            prepend-icon="mdi-magnify"
+            variant="plane"
+            rounded
+            >さがす</v-btn
+          >
+        </v-card-actions>
+      </v-card>
+    </v-dialog> -->
     <v-sheet height="90vh">
       <v-tabs v-model="tab" align-tabs="center" color="purple">
         <v-tab :value="tabList[0].value">{{ tabList[0].text }}</v-tab>
@@ -25,19 +65,19 @@
       <v-tabs-window v-model="tab">
         <v-tabs-window-item :value="tabList[0].value" item-key="id">
           <v-card
-            v-for="content in contents.filter((item) => item.categoryId === 0)"
+            v-for="content in contents.sort((a,b)=>{return b.id-a.id}).filter((item) => item.categoryId === 0)"
             :key="content"
             class="ma-2"
             variant="outlined"
           >
-            <v-card-title>{{ content.timestamp }}</v-card-title>
-            <v-card-text>{{ content.dreamContent }}</v-card-text>
+            <v-card-text class="text-pre-wrap">{{ content.dreamContent }}</v-card-text>
+            <v-card-subtitle><v-icon>mdi-update</v-icon> {{ content.timestamp }}</v-card-subtitle>
             <v-card-actions class="justify-end">
               <v-btn
                 prepend-icon="mdi-pencil"
                 color="green"
                 @click="openEditDialog(content)"
-                >ゆめを書き換える</v-btn
+                >ゆめを書き換え</v-btn
               >
               <v-btn
                 prepend-icon="mdi-delete"
@@ -50,19 +90,19 @@
         </v-tabs-window-item>
         <v-tabs-window-item :value="tabList[1].value" item-key="id">
           <v-card
-            v-for="content in contents.filter((item) => item.categoryId === 1)"
+            v-for="content in contents.sort((a,b)=>{return b.id-a.id}).filter((item) => item.categoryId === 1)"
             :key="content"
             class="ma-2"
             variant="outlined"
           >
-            <v-card-title>{{ content.timestamp }}</v-card-title>
-            <v-card-text>{{ content.dreamContent }}</v-card-text>
+            <v-card-text class="text-pre-wrap">{{ content.dreamContent }}</v-card-text>
+            <v-card-subtitle><v-icon>mdi-update</v-icon>{{ content.timestamp }}</v-card-subtitle>
             <v-card-actions class="justify-end">
               <v-btn
                 prepend-icon="mdi-pencil"
                 color="green"
                 @click="openEditDialog(content)"
-                >ゆめを書き換える</v-btn
+                >ゆめを書き換え</v-btn
               >
               <v-btn
                 prepend-icon="mdi-delete"
@@ -75,19 +115,19 @@
         </v-tabs-window-item>
         <v-tabs-window-item :value="tabList[2].value" item-key="id">
           <v-card
-            v-for="content in contents.filter((item) => item.categoryId === 2)"
+            v-for="content in contents.sort((a,b)=>{return b.id-a.id}).filter((item) => item.categoryId === 2)"
             :key="content"
             class="ma-2"
             variant="outlined"
           >
-            <v-card-title>{{ content.timestamp }}</v-card-title>
-            <v-card-text>{{ content.dreamContent }}</v-card-text>
+            <v-card-text  class="text-pre-wrap">{{ content.dreamContent }}</v-card-text>
+            <v-card-subtitle><v-icon>mdi-update</v-icon>{{ content.timestamp }}</v-card-subtitle>
             <v-card-actions class="justify-end">
               <v-btn
                 prepend-icon="mdi-pencil"
                 color="green"
                 @click="openEditDialog(content)"
-                >ゆめを書き換える</v-btn
+                >ゆめを書き換え</v-btn
               >
               <v-btn
                 prepend-icon="mdi-delete"
@@ -102,7 +142,7 @@
 
       <v-dialog v-model="editDialog">
         <v-card>
-          <v-card-title>ゆめを書き換える</v-card-title>
+          <v-card-title>ゆめを書き換え</v-card-title>
           <v-card-text>
             <v-select
               v-model="editItem.categoryId"
@@ -156,6 +196,7 @@
         </v-card>
       </v-dialog>
     </v-sheet>
+
     <v-fab
       absolute
       location="end"
@@ -169,12 +210,13 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { useContentsStore } from "../store/contents.js";
 
 const tab = ref(0);
 const contentsStore = useContentsStore();
 const dialog = ref(false);
+const searchDialog = ref(false);
 const editDialog = ref(false);
 const deleteDialog = ref(false);
 const contents = ref([]);
@@ -194,15 +236,15 @@ function onClick() {
 }
 
 function openEditDialog(content) {
-  originItem.value = JSON.parse(JSON.stringify(content)); // depp copy
-  editItem.value = content;
+  // originItem.value = JSON.parse(JSON.stringify(content)); // depp copy
+  editItem.value = JSON.parse(JSON.stringify(content)); // depp copy;
   editDialog.value = true;
 }
 
 function onUpdateClick() {
-  contentsStore.updateContentsInfo(originItem.value, editItem.value);
+  contentsStore.updateContentsInfo(editItem.value.id, editItem.value);
   editDialog.value = false;
-  contents = contentsStore.getContentsInfo();
+  // contents = contentsStore.getContentsInfo();
 }
 
 function openDeleteDialog(content) {
@@ -214,4 +256,9 @@ function onDeleteClick() {
   contentsStore.removeContentsInfo(editItem.value);
   deleteDialog.value = false;
 }
+
+// function onSearchClick(){
+
+//   searchDialog.value=false;
+// }
 </script>
