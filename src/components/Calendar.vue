@@ -55,9 +55,12 @@ const contentDate = ref(null);
 const filterdContents = ref([]);
 
 const handleDateClick = (info) => {
+
   filterdContents.value = calendarOptions.value.events.filter(
     (item) => item.start === info.dateStr
   );
+  if(filterdContents.value.length<=0)return;
+
   contentListDialog.value=true;
 };
 
